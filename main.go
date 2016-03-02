@@ -23,8 +23,8 @@ func main() {
 			Name:  "create",
 			Usage: "prints out a User struct with hash",
 			Action: func(c *cli.Context) {
-        name, email := requestCredentials();
-        user := avatar.New(name, email)
+        email := requestCredentials();
+        user := avatar.New(email)
 				fmt.Println(user)
 			},
 		},
@@ -33,11 +33,9 @@ func main() {
 	app.Run(os.Args)
 }
 
-func requestCredentials() (name, email string){
-  fmt.Fprint(Stdout, "name: ")
-  name = cmdutil.ReadLine()
+func requestCredentials() (email string){
   fmt.Fprint(Stdout, "email: ")
   email = cmdutil.ReadLine()
 
-  return name, email
+  return email
 }
