@@ -5,7 +5,7 @@ import (
   "os"
   "github.com/codegangsta/cli"
   "github.com/duranmla/avatarme/avatar"
-  "github.com/duranmla/clirescue/cmdutil"
+  "github.com/duranmla/avatarme/cmdutil"
 )
 
 var (
