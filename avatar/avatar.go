@@ -3,7 +3,6 @@ package avatar
 import (
 	"fmt"
 	"github.com/duranmla/avatarme/user"
-	"github.com/lucasb-eyer/go-colorful"
 	"image"
 	"image/color"
 	"image/draw"
@@ -21,7 +20,7 @@ var (
 
 type Avatar struct {
 	*user.User
-	Ink    string
+	Ink    color.Color
 	Pixels [][]string
 }
 
@@ -34,7 +33,15 @@ func New(email string) *Avatar {
 }
 
 func (avatar *Avatar) _getAvatarColor() {
-	avatar.Ink = avatar.Hash[26:] // last 6 characteres (Hexcolor)
+	source := avatar.Hash[26:] // last 6 characteres (Hexcolor)
+	var pixels [3]uint8
+
+	for i := 0; i < 3; i++ {
+		pixel, _ := strconv.ParseInt(source[i*2:i*2+2], 16, 64)
+		pixels[i] = uint8(pixel)
+	}
+
+	avatar.Ink = color.RGBA{pixels[0], pixels[1], pixels[2], 255}
 }
 
 func (avatar *Avatar) _getAvatarPixels() {
@@ -46,9 +53,6 @@ func (avatar *Avatar) _getAvatarPixels() {
 }
 
 func (avatar *Avatar) GenerateImage() {
-	hexColor, _ := colorful.Hex(avatar.Ink)
-	r, g, b := hexColor.RGB255()
-	pixelColor := color.RGBA{r, g, b, 255}
 	canvas := image.NewRGBA(image.Rect(0, 0, 420, 420))
 	draw.Draw(canvas, canvas.Bounds(), &image.Uniform{background}, image.ZP, draw.Src) // fill canvas with background
 	position := 0
@@ -56,12 +60,12 @@ func (avatar *Avatar) GenerateImage() {
 	for i := 0; i < 3; i++ {
 		for j := 0; j < 4; j++ {
 			hexValue := avatar.Pixels[position]
-			value, _ := strconv.ParseInt(strings.Join(hexValue, ""), 10, 0)
+			value, _ := strconv.ParseInt(strings.Join(hexValue, ""), 16, 64)
 
-			rect := image.Rect((i*90)+30, (j*90)+75, (i*90)+120, (j*90)+165)
+			rect := image.Rect((j*90)+30, (i*90)+75, (j*90)+120, (i*90)+165)
 
 			if value%2 == 0 {
-				draw.Draw(canvas, rect, &image.Uniform{pixelColor}, image.ZP, draw.Src)
+				draw.Draw(canvas, rect, &image.Uniform{avatar.Ink}, image.ZP, draw.Src)
 			}
 
 			position++
@@ -87,5 +91,5 @@ func _showImage(name string) {
 }
 
 func (avatar *Avatar) String() string {
-	return fmt.Sprintf("Hi!\nyour email is: %s\nwe've generated an image with: %s\n\ncolor assigned was: #%s\n", avatar.Email, avatar.Hash, avatar.Ink)
+	return fmt.Sprintf("Hi!\nyour email is: %s\nwe've generated an image with: %s\n\ncolor assigned was: #%v\n", avatar.Email, avatar.Hash, avatar.Ink)
 }
